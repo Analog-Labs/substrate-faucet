@@ -44,13 +44,13 @@ client.on("message", async message => {
             if (message.channel.id == config.team_channe) {
                 if (!team_channel_cache.has(message.author.id)) {
                     // fund the address in staging env for team channel
-                    msg = await faucet.send(args[0], message.channel.id == config.team_channel);
+                    msg = await faucet.send(args[0], true);
                     team_channel_cache.set(message.author.id, 1, 1000 * 60 * 60 * config.limit);
                 }
             } else {
                 if (!partner_channel_cache.has(message.author.id)) {
                     // fund the address in staging env for team channel
-                    msg = await faucet.send(args[0], message.channel.id == config.team_channel);
+                    msg = await faucet.send(args[0], false);
                     partner_channel_cache.set(message.author.id, 1, 1000 * 60 * 60 * config.limit);
                 }
             }
