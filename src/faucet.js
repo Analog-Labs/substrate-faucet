@@ -26,7 +26,7 @@ module.exports = class Faucet {
             this.staging_api.rpc.system.version(),
         ]);
 
-        console.log(`You are connected to staging chain ${staging_chain} using ${staging_node} v${staging_ersion}`);
+        console.log(`You are connected to staging chain ${staging_chain} using ${staging_node} v${staging_version}`);
 
         const [internal_chain, internal_node, internal_version] = await Promise.all([
             this.internal_api.rpc.system.chain(),
