@@ -42,7 +42,7 @@ module.exports = class Faucet {
             return `Done! Transfer ${this.config.amount} ${this.config.symbol} to ${address} with hash ${tx.toHex()}`;
         }
 
-        return `Invalid address! Plese use the Geek network format with address type ${this.config.address_type}! >> <${this.config.address_format_link}>`;
+        return `Invalid address! Please ensure you follow our instructions carefully. Refer to: <${this.config.address_format_link}>`;
 
     }
 };
