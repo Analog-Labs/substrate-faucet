@@ -16,5 +16,5 @@ module.exports = {
     amount: parseInt(process.env.AMOUNT || '1'),
     limit: 12, // The time limit for sending requests is in hours.
     channel: process.env.CHANNEL_ID, // discord channel ID
-    address_format: process.env.ADDRESS_FORMAT || 'https://docs.analog.one/documentation/resources/testnet-faucet',
+    address_format_link: process.env.ADDRESS_FORMAT || 'https://docs.analog.one/documentation/resources/testnet-faucet',
 };
