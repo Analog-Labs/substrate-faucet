@@ -42,7 +42,10 @@ client.on("message", async message => {
             let msg = `Sorry please wait for ${config.limit} hours between token requests from the same account!`;
             if (!cache.has(message.author.id)) {
                 msg = await faucet.send(args[0]);
-                cache.set(message.author.id, 1, 1000 * 60 * 60 * config.limit);
+                if (msg.startsWith("Done")) {
+                    cache.set(message.author.id, 1, 1000 * 60 * 60 * config.limit);
+                }
+                
             }
             
             await message.reply(msg);
