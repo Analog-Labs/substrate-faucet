@@ -8,6 +8,8 @@ module.exports = class Faucet {
     constructor(config) {
         this.config = config;
         this.api = null;
+        this.sender = null;
+        this.nonce = null;
         this.init();
     };
 
@@ -24,21 +26,22 @@ module.exports = class Faucet {
         ]);
 
         console.log(`You are connected to chain ${chain} using ${nodeName} v${nodeVersion}`);
+        const keyring = new Keyring({ type: "sr25519" });
+        this.sender = keyring.addFromUri(this.config.mnemonic);
+        this.nonce = this.api.system.account(this.sender.address).nonce.toNumber();
 
     };
 
     async send(address) {
-
         const check = crypto.checkAddress(address, this.config.address_type);
 
         if (check[0]) {
-            const keyring = new Keyring({ type: "sr25519" });
-            const sender = keyring.addFromUri(this.config.mnemonic);
-            // const sender = keyring.addFromUri('//Alice');
             const padding = new BN(10).pow(new BN(this.config.decimals));
             const amount = new BN(this.config.amount).mul(padding);
             console.log(`Sending ${this.config.amount} ${this.config.symbol} to ${address}`);
-            const tx = await this.api.tx.balances.transferKeepAlive(address, amount).signAndSend(sender);
+            let option = { nonce: this.nonce };
+            const tx = await this.api.tx.balances.transferKeepAlive(address, amount).signAndSend(sender, option);
+            self.nonce += 1;
             return `Done! Transfer ${this.config.amount} ${this.config.symbol} to ${address} with hash ${tx.toHex()}`;
         }
 
