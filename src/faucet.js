@@ -28,8 +28,10 @@ module.exports = class Faucet {
         console.log(`You are connected to chain ${chain} using ${nodeName} v${nodeVersion}`);
         const keyring = new Keyring({ type: "sr25519" });
         this.sender = keyring.addFromUri(this.config.mnemonic);
-        this.nonce = this.api.system.account(this.sender.address).nonce.toNumber();
+        const sharedBuffer = new SharedArrayBuffer(1);
+        this.nonce = new Int32Array(sharedBuffer);
 
+        this.nonce[0] = this.api.system.account(this.sender.address).nonce.toNumber();
     };
 
     async send(address) {
@@ -39,9 +41,8 @@ module.exports = class Faucet {
             const padding = new BN(10).pow(new BN(this.config.decimals));
             const amount = new BN(this.config.amount).mul(padding);
             console.log(`Sending ${this.config.amount} ${this.config.symbol} to ${address}`);
-            let option = { nonce: this.nonce };
+            let option = { nonce: Atomics.add(this.nonce, 0, 1) };
             const tx = await this.api.tx.balances.transferKeepAlive(address, amount).signAndSend(sender, option);
-            self.nonce += 1;
             return `Done! Transfer ${this.config.amount} ${this.config.symbol} to ${address} with hash ${tx.toHex()}`;
         }
 
