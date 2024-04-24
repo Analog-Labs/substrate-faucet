@@ -38,8 +38,15 @@ module.exports = class Faucet {
             const padding = new BN(10).pow(new BN(this.config.decimals));
             const amount = new BN(this.config.amount).mul(padding);
             console.log(`Sending ${this.config.amount} ${this.config.symbol} to ${address}`);
-            const tx = await this.api.tx.balances.transferKeepAlive(address, amount).signAndSend(sender);
-            return `Done! Transfer ${this.config.amount} ${this.config.symbol} to ${address} with hash ${tx.toHex()}`;
+
+            try {
+                const tx = await this.api.tx.balances.transferKeepAlive(address, amount).signAndSend(sender);
+                return `Done! Transfer ${this.config.amount} ${this.config.symbol} to ${address} with hash ${tx.toHex()}`;
+            } catch (error) {
+                console.log("ERROR: ", error);
+                return `Oops! Something went wrong. Please try again.`;
+            }
+            
         }
 
         return `Invalid address! Please ensure you follow our instructions carefully. Refer to: <${this.config.address_format_link}>`;
