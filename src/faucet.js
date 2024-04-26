@@ -1,7 +1,9 @@
+const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
+const { decodeAddress, encodeAddress } = require('@polkadot/keyring');
+const { checkAddress } = require('@polkadot/util-crypto');
+const { hexToU8a, isHex } = require('@polkadot/util');
 
-const { ApiPromise, WsProvider, Keyring } = require("@polkadot/api"),
-    { BN } = require("bn.js"),
-    crypto = require("@polkadot/util-crypto");
+const { BN } = require("bn.js");
 
 module.exports = class Faucet {
 
@@ -12,9 +14,7 @@ module.exports = class Faucet {
     };
 
     async init() {
-        const ws = new WsProvider(this.config.ws);
-        // this.api = await ApiPromise.create({ types: types, provider: ws });
-        this.api = await ApiPromise.create({ provider: ws });
+        this.api = await ApiPromise.create({ provider: new WsProvider(this.config.ws) });
 
         // Retrieve the chain & node information information via rpc calls
         const [chain, nodeName, nodeVersion] = await Promise.all([
@@ -24,19 +24,19 @@ module.exports = class Faucet {
         ]);
 
         console.log(`You are connected to chain ${chain} using ${nodeName} v${nodeVersion}`);
-
     };
 
     async send(address) {
 
-        const check = crypto.checkAddress(address, this.config.address_type);
-
-        if (check[0]) {
+        // If address has correct prefix and checksum, trigger payout
+        const prefix_check = crypto.checkAddress(address, this.config.address_type);
+        if (prefix_check[0]) {
             const keyring = new Keyring({ type: "sr25519" });
             const sender = keyring.addFromUri(this.config.mnemonic);
-            // const sender = keyring.addFromUri('//Alice');
+
             const padding = new BN(10).pow(new BN(this.config.decimals));
             const amount = new BN(this.config.amount).mul(padding);
+
             console.log(`Sending ${this.config.amount} ${this.config.symbol} to ${address}`);
 
             try {
@@ -46,10 +46,23 @@ module.exports = class Faucet {
                 console.log("ERROR: ", error);
                 return `Oops! Something went wrong. Please try again.`;
             }
-            
         }
 
-        return `Invalid address! Please ensure you follow our instructions carefully. Refer to: <${this.config.address_format_link}>`;
+        // Otherwise try to recover the correct address to support the user
+        try {
+            const corrected = encodeAddress(
+                isHex(address, 32)
+                    ? hexToU8a(address)
+                    : decodeAddress(address),
+                this.config.address_type
+            );
 
+            return `Provided address uses different prefix or encoding. Attempting to correct the encoding resulted in the following address: '${corrected}'. Please verify the automatically converted address before trying again and refer to: <${this.config.address_format_link}>`;
+        } catch (error) {
+            console.log("ERROR: ", error);
+        }
+
+        // Or fail with a general address error if all recovery failed
+        return `Invalid address! Please ensure you follow our instructions carefully. Refer to: <${this.config.address_format_link}>`;
     }
 };
