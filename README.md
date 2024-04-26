@@ -16,6 +16,9 @@ To make the runtime more reusable, the following env variables should be supplie
 - CHANNEL_ID - Discord channel ID
 - MNEMONIC - Seed phrase for the token sender account
 - DISCORD_TOKEN - Auth token from Discord to authenticate the bot
+- ADDRESS_TYPE - Optional SS58 prefix identifier
+- AMOUNT - Size of faucet drip, defaults to 1 if not specified
+- ADDRESS_FORMAT_LINK - URL used in error message for malformed addresses, defaults to analog.one docs
 
 ## compile bot
 ```
