@@ -24,17 +24,15 @@ module.exports = class Faucet {
         ]);
 
         console.log(`You are connected to chain ${chain} using ${nodeName} v${nodeVersion}`);
-
     };
 
     async send(address) {
-
         const check = crypto.checkAddress(address, this.config.address_type);
 
         if (check[0]) {
             const keyring = new Keyring({ type: "sr25519" });
             const sender = keyring.addFromUri(this.config.mnemonic);
-            // const sender = keyring.addFromUri('//Alice');
+
             const padding = new BN(10).pow(new BN(this.config.decimals));
             const amount = new BN(this.config.amount).mul(padding);
             console.log(`Sending ${this.config.amount} ${this.config.symbol} to ${address}`);
@@ -46,10 +44,7 @@ module.exports = class Faucet {
                 console.log("ERROR: ", error);
                 return `Oops! Something went wrong. Please try again.`;
             }
-            
         }
-
         return `Invalid address! Please ensure you follow our instructions carefully. Refer to: <${this.config.address_format_link}>`;
-
     }
 };
